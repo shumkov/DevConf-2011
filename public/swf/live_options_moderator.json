@@ -1,0 +1,254 @@
+{"controllers": {
+	"data_controller": { "type": "control.DataController" },
+	"image_controller": { "type": "control.ImageController" },
+	"connection_controller": { "type": "control.ConnectionController" },
+	"slide_show_controller": { "type": "control.SlideShowController" },
+	"gallery_controller": { "type": "control.GalleryController" },
+	"moderator_controller": { "type": "control.ModeratorController" },
+	"audio_controller": { "type": "control.AudioController" },
+	"growl_controller": { "type": "control.GrowlController" },
+	"view_controller": { "type": "control.ViewController" },
+	"chat_controller": { 
+		"type": "control.ChatController",
+		"factory": {
+			"ChatGrowl": {
+				"type": "ui.ChatGrowl",
+				"root": {
+					"left": 0,
+					"right": 0,
+					
+					"children": {
+						"ui_deleteGrowlButton": {
+							"top": 10,
+							"right": 10
+						},
+						"ui_growlText": {
+							"left": 10, 
+							"top": 10, 
+							"bottom": 10, 
+							"right": 30
+						}
+					}
+				}
+			},
+			"ChatMessage": {
+				"type": "ui.ChatMessage",
+				"root": {
+					"left": 0,
+					"right": 0,
+					"children": {
+						"ui_deleteMessageButton": {
+							"top": 5,
+							"right": 0
+						}, 
+						"ui_messageText": {
+							"left": 5,
+							"right": 20,
+							"middle": 0
+						},
+						"ui_timeText": {}
+					}
+				}
+			}
+		}
+	},
+	"slider_controller": { 
+		"type": "control.GallerySliderController", 	
+		"factory": {
+			"PreviewBackground": { "type" : "ui.PreviewItemBackground" },
+			"PreviewForeground": { 
+				"type": "ui.PreviewItemForeground", 
+				"root" : {
+					"left": 2, 
+					"top": 2, 
+					"bottom": 2, 
+					"right": 2,
+					
+ 					"children" : {
+						"ui_timerText": { "center": 0, "middle": 0 }
+					}
+				}
+			}
+		}
+	}
+},
+	
+"root": {
+	"children": {
+
+		"ui_growlContainer": {
+			"width": 300,
+			"top": 55,
+			"right": 5
+		},
+
+		"ui_chatPanel": {
+			"top": 50, 
+			"bottom": 130, 
+			"right": 0,
+			"width": 300,
+
+			"children": {
+				"ui_chatToggleButton": {
+					"left": -40,
+					"top": 40
+				},
+				"ui_imagePreview": {
+					"width": 76,
+					"height": 76
+				},
+				"ui_sendButton": { "bottom": 10, "right": 5 },
+				"ui_chatOutput": { "left": 0, "top": 0, "bottom": 40, "right": 18 },
+				"ui_chatScroll": {
+					"right": 5,
+					"top": 5,
+					"bottom": 40,
+
+					"children": {
+						"ui_chatScrollRunner": { "center": 0 }
+					}
+				},
+				"ui_messageInput": { 
+					"left": 5,
+					"right": 87,
+					"bottom": 5,
+					"height": 30, 
+					
+					"children": {
+						"ui_messageField": { "left": 5, "middle": 0, "right": 5 }
+					}
+				}
+			}
+		},
+
+		"ui_bg": { 
+			"left": 0, 
+			"top": 0, 
+			"bottom": 0, 
+			"right": 0,
+			"depth": 0 
+		},
+
+		"ui_stopMessage": { "center": 0, "middle": 0 },
+		"ui_nextButton":  { "middle": 0, "left": 10, "depth": 2  },
+		"ui_prevButton":  { "middle": 0, "right": 10, "depth": 3  },
+
+		"ui_adminPanel": {
+			"width": 240, 
+			"center": 0, 
+			"height": 40, 
+			"bottom": 130,
+
+			"children": {
+				"ui_deleteButton": { "left": 10, "middle": 0 },
+				"ui_acceptButton": { "left": 90, "middle": 0 },
+				"ui_acceptTimer": { "right": 5, "middle": 0 }
+			}
+		},
+
+		"ui_preloader": {
+			"top": 50, 
+			"left": 0, 
+			"right": 0, 
+			"bottom": 130,
+			"depth": -1,
+
+			"children": {
+				"ui_preloadText": { "center": 0, "middle": 0 }
+			}
+		},
+
+		"ui_topPanel": {
+			"right": 0, 
+			"left": 0, 
+			"height": 50, 
+			"top": 0,
+	   	 	
+	   	 	"children": {
+
+				"ui_geometriaLogo": { "middle": 0, "left": 10 },	
+				"ui_logo": { "middle": 0, "left": 160 },
+	
+	   	 		"ui_titleText": { "middle": 0, "left": 255 },
+	   	 		
+				"ui_imagePreloader": { "middle": 0, "right": 455 },
+	
+	   	 		"ui_repeatOn":  { "middle": 0, "right": 315 },
+	   	 		"ui_repeatOff": { "middle": 0, "right": 315 },
+	
+	   	 		"ui_startGrowl":  { "middle": 0, "right": 135 },
+	   	 		"ui_stopGrowl": { "middle": 0, "right": 135 },
+	   	 		
+	   	 		"ui_expandButton":   { "middle": 0, "right": 20 },
+	   	 		"ui_collapseButton": { "middle": 0, "right": 20 },
+	   	 		
+	  	 		"ui_stopIndicator": { "middle": 0 }
+	   	 	}
+		},
+
+		"ui_controlPanel": {
+	   	 	"right": 0, 
+	   	 	"left": 0,
+	   	 	"height": 130, 
+	   	 	"bottom": 0,
+
+			"children": {
+	
+				"ui_firstImage": {
+					"left": 10, 
+					"top": 10, 
+					"bottom": 10, 
+					"width": 150 ,
+		
+					"children": {
+						"ui_blackRect": { 
+							"left": 2, 
+							"top": 2, 
+							"bottom": 2, 
+							"right": 2, 
+							"depth": 1 
+						},
+						"ui_redRect":   { 
+							"left": 2, 
+							"top": 2, 
+							"bottom": 2, 
+							"right": 2, 
+							"depth": 3 
+						},
+			
+						"ui_repeatIndicator": { "center": 0, "middle": 0 },
+						"ui_timerText": { 
+							"center": 0, 
+							"middle": 0, 
+							"depth": 4  
+						}
+					}
+				},
+	
+				"ui_leftButton":  { "left": 180, "middle": 0 },
+				"ui_rightButton": { "right": 180, "middle": 0 },
+	
+				"ui_audioPanel" : { "right": 10, "top": 10, "bottom": 10, "width": 150 },
+	
+				"ui_scrollBar": {
+					"left": 240, 
+					"right": 240, 
+					"top": 100,
+			
+					"children": {
+						"ui_scrollRunner": {
+							"top": 0,
+					
+							"children": {
+								"ui_photoTimeText": { "middle": 0, "center": 0 }
+							}
+						}
+					}
+				},
+	
+				"ui_previewSlider": { "left": 240, "right": 240, "top": 10, "height": 80 },
+				"ui_bgPhotoTimeText": { "left": 240, "top": 100 }
+			}
+		}
+	}
+}}
