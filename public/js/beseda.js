@@ -1390,7 +1390,7 @@ beseda.transport.WebSocket = function() {
 beseda.utils.inherits(beseda.transport.WebSocket, beseda.Transport);
 
 beseda.transport.WebSocket.isAvailable = function(options) {
-	return  !!window.WebSocket;
+	return  false;//!!window.WebSocket;
 };
 
 beseda.transport.WebSocket.prototype.__initClosuredHandlers = function() {

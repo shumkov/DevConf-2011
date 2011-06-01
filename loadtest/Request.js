@@ -24,7 +24,7 @@ Request.prototype.send = function(body) {
         }
     }
 
-    this._request = (this._options.ssl ? https : http).request(this._options, this._onResponse.bind(this));
+    this._request = http.request(this._options, this._onResponse.bind(this));
     this._request.on('error', this.__onError);
 
     if (body) {
@@ -52,8 +52,7 @@ Request.prototype._endRequest = function() {
         this.emit('error', this._response.statusCode + ' - ' + this._responseBody);
     }
 
-    this._response.removeAllListeners();
-    this._request.removeAllListeners();
+	this._request = null;
 };
 
 Request.prototype._onError = function(error) {
