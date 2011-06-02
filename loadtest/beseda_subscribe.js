@@ -18,6 +18,7 @@ function merge (object, extend) {
     return object;
 };
 
+// ssh -l kononenchik -p 30122 192.168.2.147
 ///////////////////////////////////////////////////////////////////////////////
 
 var CONNECTION_OPTIONS = {
