@@ -1,0 +1,23 @@
+{
+    "name": "devconf-2011 live",
+    "version": "0.0.1",
+    "description": "",
+    "homepage": "http://geometria-lab.net",
+    "author": "Geometria Lab",
+    "contributors": [
+        { "name": "Ivan Shumkov",     "email": "ivan@shumkov.ru" },
+        { "name": "Sergey Kononenko", "email": "kononencheg@gmail.com" }
+    ],
+    "main": "./server.js",
+    "repository": {
+        "type" : "git",
+        "url"  : "git://github.com/geometria-lab/DevConf-2011.git"
+    },
+    "dependencies" : {
+        "redis-node"  : ">=0.4.0",
+        "beseda"      : "*",
+        "express"     : "*",
+        "imagemagick" : "*"
+    },
+    "engines" : [ "node >=0.4" ]
+}

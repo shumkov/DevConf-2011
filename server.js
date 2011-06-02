@@ -1,20 +1,14 @@
 var http = require('http'),
 	util = require('util'),
 	redis = require('redis-node')
-	im = require('imagemagick');;
+	im = require('imagemagick'),
+    Beseda  = require('beseda');
 
-var express = require('./vendor/express');
-
-var Beseda = require('./vendor/beseda');
 
 var IMG_FOLDER = '';
 var IMG_FOLDER_URL = '';
 
 var LAST_IMAGE_ID = 0;
-
-///////////////////////////////////////////////////////////////////////////////
-
-var server = express.createServer();
 
 server.get('/', serveIndex);
 server.get('/index.html', serveIndex);
@@ -60,6 +54,7 @@ client.subscribeTo('Geometria_Streaming:kanon', function(channel, message) {
 	convertPreview(url, IMG_FOLDER + preview, callback);
 	convertThumb(url, IMG_FOLDER + thumbnail, callback);
 });
+
 
 function sendImage(original, preview, thumbnail) {
 	beseda.publish('/live', {
