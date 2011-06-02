@@ -15,6 +15,20 @@
 			html, body {
 				height: 100%;
 			}
+            #formBox {
+                width:100%;
+                height:100%;
+                text-align:center;
+                vertical-align:middle;
+                line-height:1.5;
+            }
+            #formBox * {
+                overflow:visible;
+            }
+            #errorBox {
+                color:red;
+                font-size:0.9em;
+            }
         </style>
 
 		<script src="/static/js/swfobject.js"></script>
@@ -46,28 +60,57 @@
 
 	<body>
 		<div id="live_container"></div>
-
 		<script type="text/javascript">
-			
-			swfobject.embedSWF(
-				'/static/swf/LiveGallery.swf', 'live_container',
-				'100%', '100%', '10.0.0', null, {
-					audioStream: 'stream',
-					audioStreamServer: 'rtmp://audio.stream.geofiles.net/live',
-					picturesUrl: '/images',
-					eventClub: 'DevConf',
-					eventName: 'Live',
-					moderator: 'true',
-					userId: '1',
-					userName: 'Shumkov',
-					newMessageUrl: '',
-					messagesUrl: '/messages'
-				}, {
-					menu: 'false',
-					allowFullScreen: true,
-					allowScriptAccess:'always'
-				}, { id: GALLERY_ID, name: GALLERY_ID }
-			);
+            function sendUserName(form){
+                var input = form.getElementsByTagName('input')[0],
+                    user = input.value.toString().replace(/^\s+/, '').replace(/\s+$/, ''),
+                    errorBox = document.getElementById('errorBox'),
+                    wraper = document.getElementById('formBox');
+                if(user.length){
+                    wraper.style.display = 'none';
+                    createGalleryWindow(user);
+                    errorBox.style.display = 'none';
+                } else {
+                    errorBox.style.display = '';    
+                }
+                return false;
+            }
+
+            function createGalleryWindow(user){
+                swfobject.embedSWF(
+                    '/static/swf/LiveGallery.swf', 'live_container',
+                    '100%', '100%', '10.0.0', null, {
+                        audioStream: 'stream',
+                        audioStreamServer: 'rtmp://audio.stream.geofiles.net/live',
+                        picturesUrl: '/images',
+                        eventClub: 'DevConf',
+                        eventName: 'Live',
+                        moderator: 'true',
+                        userId: new Date().getTime(),
+                        userName: user,
+                        newMessageUrl: '',
+                        messagesUrl: '/messages'
+                    }, {
+                        menu: 'false',
+                        allowFullScreen: true,
+                        allowScriptAccess:'always'
+                    }, { id: GALLERY_ID, name: GALLERY_ID }
+                );
+            }
         </script>
+
+        <table id="formBox">
+            <tr>
+                <td>
+                    <form action="javascript:void(0)" onsubmit="sendUserName(this)">
+                        <label>Введите ваше имя:</label>
+                        <input type="text" name="user"/>
+                        <button type="submit">Отправить</button>
+                        <br/>
+                        <div id="errorBox" style="display:none">Поле не может быть пустым</div>
+                    </form>
+                </td>
+            </tr>
+        </table>
 	</body>
 </html>
