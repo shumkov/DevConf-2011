@@ -4,7 +4,7 @@
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-	<title>WebSocket client broadcast time</title>
+	<title>Long polling lost clients</title>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 </head>
 <body>
@@ -17,25 +17,26 @@
         data.addColumn('number', 'Beseda');
         data.addColumn('number', 'Juggernaut');
 
-        data.addRow([2500, 234, 320]);
-        data.addRow([5000, 298, 402]);
-        data.addRow([7500, 360,582]);
-        data.addRow([10000, 442, 606]);
-        data.addRow([12500, 520, 809]);
-        data.addRow([15000, 521, 874]);
-        data.addRow([20000, 723, 1037]);
-        data.addRow([25000, 884, 1315]);
-        data.addRow([30000, 1001, 1733]);
-        data.addRow([40000, 1037, 2280]);
+        data.addRow([1000, 0, 0]);
+        data.addRow([2500, 0, 628]);
+        data.addRow([5000, 0, 3000]);
+        data.addRow([7500, 0, 7500]);
+        data.addRow([10000, 0, 10000]);
+        data.addRow([12500, 0, 12500]);
+        data.addRow([15000, 0, 15000]);
+        data.addRow([20000, 0, 20000]);
+        data.addRow([25000, 0, 25000]);
+        data.addRow([30000, 0, 30000]);
+        data.addRow([40000, 0, 40000]);
 
         // Create and draw the visualization.
         var chart = new google.visualization.ScatterChart(document.getElementById('visualization'));
-        chart.draw(data, { title: 'WebSocket client broadcast time',
+        chart.draw(data, { title: 'Long polling lost clients',
                            lineWidth: 2,
                            pointSize: 0,
                            width: 1024, height: 640,
-                           vAxis: {title: "Milliseconds"},
-                           hAxis: {title: "Clients"}}
+                           vAxis: {title: "Lost clients"},
+                           hAxis: {title: "Connected clients"}}
         );
     };
 
