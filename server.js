@@ -1,25 +1,41 @@
+//--------------------------
+
 var http    = require('http'),
 	util    = require('util'),
 	redis   = require('redis-node'),
-    express = require('express'),
-    Beseda  = require('beseda');
+    Beseda  = require('beseda'),
+    Router  = require('beseda/server/lib/router.js');
 
 
-var app = express.createServer();
+var router = Router();
 
-
-
-
-
-server.get('/', serveIndex);
-server.get('/index.html', serveIndex);
-server.get('/static/:folder/:file', serveStatic);
-server.get('/images', serveImages);
-server.get('/messages', serveMessages);
-
+var server = http.createServer(function(request, response) {
+    if (!router.dispatch(request, response)) {
+        response.writeHead(404);
+        response.end();
+    }
+});
 server.listen(4000);
 
 var beseda = new Beseda({ server : server });
+
+
+//----------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 var client = redis.createClient(6379);
 
