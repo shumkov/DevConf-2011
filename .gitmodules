@@ -1,0 +1,3 @@
+[submodule "vendor/beseda"]
+	path = vendor/beseda
+	url = git@github.com:geometria-lab/DevConf-2011.git

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title></title>
+</head>
+<body>
+<script type="text/javascript">
+	function drawVisualization() {
+    // Create and populate the data table.
+    var data = new google.visualization.DataTable();
+    data.addColumn('number', 'X');
+    data.addColumn('number', 'Beseda');
+    data.addColumn('number', 'Juggernaut');
+  data.addRow([2500, 234, 320]);
+  data.addRow([5000, 298, 402]);
+  data.addRow([7500, 360,582]);
+  data.addRow([10000, 442, 606]);
+  data.addRow([12500, 520, 809]);
+  data.addRow([15000, 521, 874]);
+  data.addRow([20000, 723, 1037]);
+  data.addRow([25000, 884, 1315]);
+  data.addRow([30000, 1001, 1733]);
+  data.addRow([40000, 1037, 2280]);
+
+    // Create and draw the visualization.
+    var chart = new google.visualization.ScatterChart(
+        document.getElementById('visualization'));
+    chart.draw(data, {title: 'Long Polling',
+                      lineWidth: 2,
+                      pointSize: 0,
+                      width: 1024, height: 640,
+                      vAxis: {title: "Broadcast time", titleTextStyle: {color: "green"}},
+                      hAxis: {title: "Clients count", titleTextStyle: {color: "green"}}}
+              );
+}
+​
+​
+	</script>
+</body>
+</html>

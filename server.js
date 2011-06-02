@@ -2,11 +2,24 @@ var http    = require('http'),
 	util    = require('util'),
 	redis   = require('redis-node'),
     im      = require('imagemagick'),
-    Beseda  = require('beseda'),
-    Router  = require('beseda/server/lib/router.js');
+    Beseda  = require('./vendor/beseda/server'),
+    Router  = require('./vendor/beseda/server/lib/router.js');
 
 
-var router = Router();
+var router = new Router();
+
+router.get('/crossdomain.xml', function(request, response) {
+	response.writeHead(200, {'Content-Type': 'text/xml' });
+	response.end(
+		'<?xml version="1.0"?>' +
+		'<!DOCTYPE cross-domain-policy SYSTEM "/xml/dtds/cross-domain-policy.dtd">' +
+		'<cross-domain-policy>' +
+			'<site-control permitted-cross-domain-policies="all"/>' +
+			'<allow-access-from domain="*" to-ports="*" />' +
+			'<allow-http-request-headers-from domain="*" headers="*"/>' +
+		'</cross-domain-policy>'
+	);
+});
 
 router.get('/messages', function(request, response){
     response.end(JSON.stringify({
@@ -51,37 +64,17 @@ var server = http.createServer(function(request, response) {
         response.end();
     }
 });
+
 server.listen(4000);
 
-var beseda = new Beseda({ server : server });
-
-
-
-
-
-
-
-
-
-
-
-
-
-var http = require('http'),
-	util = require('util'),
-	redis = require('redis-node')
-	,
-    Beseda  = require('beseda');
+var beseda = new Beseda({ server : server, pubSub: 'redis' });
 
 
 var IMG_FOLDER = '';
 var IMG_FOLDER_URL = '';
 var LAST_IMAGE_ID = 0;
 
-
-
-
-var client = redis.createClient(6379/**, '192.168.1.161'*/);
+var client = redis.createClient(6379/*, '192.168.1.161'*/);
 
 client.on('connected', function() {
 	util.print('Connected to Redis!\n');
@@ -102,7 +95,7 @@ client.subscribeTo('Geometria_Streaming:kanon', function(channel, message) {
 	var callback = function() {
 		i++;
 
-		if (i === 1) {
+		if (i === 3) {
 			sendImage(
 				IMG_FOLDER_URL + original,
 				IMG_FOLDER_URL + preview,
@@ -118,14 +111,14 @@ client.subscribeTo('Geometria_Streaming:kanon', function(channel, message) {
 
 
 function sendImage(original, preview, thumbnail) {
-	beseda.publish('/live', {
+	beseda.publish('/live', JSON.stringify({
 		id: ++LAST_IMAGE_ID,
 		status: 1,
 		originalUrl: original,
 		previewUrl: preview,
 		thumbnailUrl: thumbnail,
 		createdAt: (Date.now() / 1000) | 0
-	});
+	}));
 }
 
 function convertOriginal(url, name, callback) {
@@ -146,9 +139,6 @@ function convertOriginal(url, name, callback) {
 		name
 	], function(err, stdout, stderr){
 			if (err) throw err;
-
-			console.log('stdout:', stdout);
-
 			callback();
 		}
 	);
@@ -167,9 +157,6 @@ function convertPreview(url, name, callback) {
 		name
 	], function(err, stdout, stderr){
 			if (err) throw err;
-
-			console.log('stdout:', stdout);
-
 			callback();
 		}
 	);
@@ -188,9 +175,6 @@ function convertThumb(url, name, callback) {
         name
 	], function(err, stdout, stderr){
 			if (err) throw err;
-
-			console.log('stdout:', stdout);
-
 			callback();
 		}
 	);
