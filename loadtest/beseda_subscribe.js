@@ -67,7 +67,9 @@ BesedaClient.prototype.__handleConnect = function(data) {
 
 	util.log('Connected ' + this.__id);
 
-	redisClient.rpush('beseda_clients', this.__id);
+	redisClient.rpush('beseda_clients', this.__id, function(err) {
+		if (err) throw err;
+	});
 
 	this.__pollRequest =  new Request(merge({
 		path: '/beseda/io/longPolling/' + this.__id + '/' + Date.now()
@@ -113,10 +115,13 @@ BesedaClient.prototype.__handlePoll = function(data) {
 		} else if (!result.channel) {
 			redisClient.rpush(
 				'beseda_client:' + this.__id,
-				Date.now() - parseInt(result)
+				Date.now() - parseInt(result),
+				function(err) {
+					if (err) throw err;
+				}
 			);
 			
-			//util.log(Date.now() - parseInt(result));
+			util.log(Date.now() - parseInt(result));
 		}
 	} catch (error) {};
 
