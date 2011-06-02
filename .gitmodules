@@ -1,7 +1,7 @@
 
 [submodule "vendor/beseda"]
 	path = vendor/beseda
-	url = git@github.com:geometria-lab/Beseda.git
+	url = git://github.com/geometria-lab/Beseda.git
 [submodule "vendor/express"]
 	path = vendor/express
 	url = git://github.com/visionmedia/express.git
