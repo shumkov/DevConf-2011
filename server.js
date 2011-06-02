@@ -1,14 +1,15 @@
-var http = require('http'),
-	util = require('util'),
-	redis = require('redis-node');
+var http    = require('http'),
+	util    = require('util'),
+	redis   = require('redis-node'),
+    express = require('express'),
+    Beseda  = require('beseda');
 
-var express = require('./vendor/express');
 
-var Beseda = require('./vendor/beseda');
+var app = express.createServer();
 
-///////////////////////////////////////////////////////////////////////////////
 
-var server = express.createServer();
+
+
 
 server.get('/', serveIndex);
 server.get('/index.html', serveIndex);
@@ -33,20 +34,6 @@ client.on('connection error', function(error) {
 client.subscribeTo('hello', function(channel, message) {
 	util.print(message + '\n');
 });
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-function serveIndex(request, response) {
-	response.sendfile(__dirname + '/public/index.html');
-}
-
-function serveStatic(request, response) {
-	response.sendfile(
-		__dirname + '/public/' + request.params.folder +
-						   '/' + request.params.file
-	);
-}
 
 function serveImages(request, response) {
 	response.end(JSON.stringify({
