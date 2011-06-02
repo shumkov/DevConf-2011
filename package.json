@@ -14,8 +14,10 @@
         "url"  : "git://github.com/geometria-lab/DevConf-2011.git"
     },
     "dependencies" : {
-        "beseda"  : "*",
-        "express" : "*"
+        "beseda"      : "*",
+        "express"     : "*",
+        "imagemagick" : "*"
+        
     },
     "engines" : [ "node >=0.4" ]
 }
