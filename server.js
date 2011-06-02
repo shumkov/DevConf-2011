@@ -112,12 +112,15 @@ client.subscribeTo('Geometria_Streaming:kanon', function(channel, message) {
 
 function sendImage(original, preview, thumbnail) {
 	beseda.publish('/live', JSON.stringify({
-		id: ++LAST_IMAGE_ID,
-		status: 1,
-		originalUrl: original,
-		previewUrl: preview,
-		thumbnailUrl: thumbnail,
-		createdAt: (Date.now() / 1000) | 0
+		action: 'picture.approve',
+		data: {
+			id: ++LAST_IMAGE_ID,
+			status: 1,
+			originalUrl: original,
+			previewUrl: preview,
+			thumbnailUrl: thumbnail,
+			createdAt: (Date.now() / 1000) | 0
+		}
 	}));
 }
 
