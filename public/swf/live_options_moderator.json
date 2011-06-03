@@ -8,6 +8,7 @@
 	"audio_controller": { "type": "control.AudioController" },
 	"growl_controller": { "type": "control.GrowlController" },
 	"view_controller": { "type": "control.ViewController" },
+    "spectrum_controller": { "type": "control.SpectrumController" },
 	"chat_controller": { 
 		"type": "control.ChatController",
 		"factory": {
@@ -79,7 +80,8 @@
 		"ui_growlContainer": {
 			"width": 300,
 			"top": 55,
-			"right": 5
+			"right": 5,
+			"depth": -4
 		},
 
 		"ui_chatPanel": {
@@ -87,6 +89,7 @@
 			"bottom": 130, 
 			"right": 0,
 			"width": 300,
+			"depth": -3,
 
 			"children": {
 				"ui_chatToggleButton": {
@@ -146,16 +149,18 @@
 			}
 		},
 
-		"ui_preloader": {
-			"top": 50, 
-			"left": 0, 
-			"right": 0, 
-			"bottom": 130,
-			"depth": -1,
+		"ui_spectrum": {
+			"center": 0, 
+			"middle": 0,
+			"depth": 1 
+		},
 
-			"children": {
-				"ui_preloadText": { "center": 0, "middle": 0 }
-			}
+		"ui_logoPlace": {
+			"depth": -1, 
+			"right": 10, 
+			"bottom": 10,
+			"width": 150,
+			"height": 70
 		},
 
 		"ui_topPanel": {
