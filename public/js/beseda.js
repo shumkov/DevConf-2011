@@ -515,19 +515,6 @@ beseda.events.EventEmitter.prototype.setMaxListeners = function(n) {
  * @param {... Object} var_args
  */
 beseda.events.EventEmitter.prototype.emit = function(type, var_args) {
-    // If there is no 'error' event listener then throw.
-    if (type === 'error') {
-        if (!this._events || !this._events.error ||
-                (beseda.events.EventEmitter.isArray(this._events.error) && !this._events.error.length))
-        {
-            if (arguments[1] instanceof Error) {
-                throw arguments[1]; // Unhandled 'error' event
-            } else {
-                throw new Error("Uncaught, unspecified 'error' event.");
-            }
-        }
-    }
-
     if (!this._events) return false;
     var handler = this._events[type];
     if (!handler) return false;
@@ -1390,7 +1377,7 @@ beseda.transport.WebSocket = function() {
 beseda.utils.inherits(beseda.transport.WebSocket, beseda.Transport);
 
 beseda.transport.WebSocket.isAvailable = function(options) {
-	return  false;//!!window.WebSocket;
+	return !!window.WebSocket;
 };
 
 beseda.transport.WebSocket.prototype.__initClosuredHandlers = function() {
@@ -1431,6 +1418,7 @@ beseda.transport.WebSocket.prototype.disconnect = function() {
 };
 
 beseda.transport.WebSocket.prototype._doSend = function(data) {
+	console.log(data);
 	this.__ws['send'](data);
 };
 

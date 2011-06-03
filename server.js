@@ -2,6 +2,7 @@ var http    = require('http'),
 	util    = require('util'),
 	redis   = require('redis-node'),
     im      = require('imagemagick'),
+	qs      = require('querystring'),
     Beseda  = require('./vendor/beseda/server'),
     Router  = require('./vendor/beseda/server/lib/router.js');
 
@@ -21,28 +22,81 @@ router.get('/crossdomain.xml', function(request, response) {
 	);
 });
 
-router.get('/messages', function(request, response){
-    response.end(JSON.stringify({
-		items: [{
-			id: 1,
-			text: 'Hello everyone!!!',
-			createdAt: new Date(),
-			userName: 'Kononenko',
-			pictureId: 1
-		}]
-	}));
+var redisClient = redis.createClient(6379/*, '192.168.1.161'*/);
+
+redisClient.on('connected', function() {
+	util.print('Connected to Redis!\n');
 });
 
+redisClient.on('connection error', function(error) {
+	util.print('Redis connection error: ' + error + '\n');
+});
+
+router.get('/messages', function(request, response){
+
+	var data = '{"items":[';
+	var callback = function(message, isLast) {
+		data += message;
+
+		if (isLast) {
+			data += ']}';
+			response.end(data);
+
+			util.log(data);
+		} else {
+			data += ',';
+		}
+	}
+
+	redisClient.llen('messages', function(err, l){
+		var i = 0;
+		while (i < l) {
+			writeMessage(i, callback, i == l - 1);
+			i++;
+		}
+	});
+});
+
+function writeMessage(index, callback, isLast) {
+	redisClient.lindex('messages', index, function(err, message) {
+		callback(message, isLast);
+	});
+};
+
 router.post('/messages/new', function(request, response){
-    response.end(JSON.stringify({
-		items: [{
-			id: 1,
-			text: 'Hello everyone!!!',
-			createdAt: new Date(),
-			userName: 'Kononenko',
-			pictureId: 1
-		}]
-	}));
+	var data = '';
+
+    request.on('data', function(chunk){
+	    data += chunk;
+    });
+
+	request.on('end', function(){
+		var query = qs.parse(data);
+
+		redisClient.incr('last_message_id', function(err, id) {
+			if (err) throw err;
+
+			var message = {
+				id: id,
+				text: query.text,
+				createdAt: (Date.now() / 1000) | 0,
+				userName: query.userName,
+				pictureId: query.pictureId,
+				userId: query.userId
+			};
+
+			redisClient.rpush('messages', JSON.stringify(message), function(err) {
+				if (err) throw err;
+			});
+
+			message.sign = query.sign;
+
+			beseda.publish('/live', JSON.stringify({
+				action: 'message.new',
+				data: message
+			}));
+		});
+	});
 });
 
 router.get('/images', function(request, response) {
@@ -74,17 +128,17 @@ var IMG_FOLDER = '';
 var IMG_FOLDER_URL = '';
 var LAST_IMAGE_ID = 0;
 
-var client = redis.createClient(6379/*, '192.168.1.161'*/);
+var pubsubClient = redis.createClient(6379/*, '192.168.1.161'*/);
 
-client.on('connected', function() {
-	util.print('Connected to Redis!\n');
+pubsubClient.on('connected', function() {
+	util.print('Connected to Redis pubsub!\n');
 });
 
-client.on('connection error', function(error) {
+pubsubClient.on('connection error', function(error) {
 	util.print('Redis connection error: ' + error + '\n');
 });
 
-client.subscribeTo('Geometria_Streaming:kanon', function(channel, message) {
+pubsubClient.subscribeTo('Geometria_Streaming:kanon', function(channel, message) {
 	var url = message;
 	var prefix = 'image_' + LAST_IMAGE_ID++;
 	var original = prefix + '.jpg'
