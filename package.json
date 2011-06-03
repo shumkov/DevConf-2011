@@ -15,7 +15,7 @@
     },
     "dependencies" : {
         "redis-node"  : ">=0.4.0",
-        "beseda"      : "*",
+        "beseda"      : ">=0.0.8",
         "imagemagick" : "*"
     },
     "engines" : [ "node >=0.4" ]

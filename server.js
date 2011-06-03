@@ -3,8 +3,8 @@ var http    = require('http'),
 	redis   = require('redis-node'),
     im      = require('imagemagick'),
 	qs      = require('querystring'),
-    Beseda  = require('./vendor/beseda/server'),
-    Router  = require('./vendor/beseda/server/lib/router.js');
+    Beseda  = require('beseda'),
+    Router  = require('beseda/server/lib/router.js');
 
 
 var redisClient = redis.createClient(6379/*, '192.168.1.161'*/);
@@ -69,7 +69,10 @@ function newMessageRequest(request, response) {
 	var data = '';
 
     request.on('data', function(chunk){ data += chunk; });
-	request.on('end', function(){ applyMessage(data); });
+	request.on('end', function(){
+		applyMessage(data);
+		response.end();
+	});
 }
 
 function deleteAllMessagesRequest(request, response) {
