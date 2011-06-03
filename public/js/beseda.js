@@ -1418,7 +1418,6 @@ beseda.transport.WebSocket.prototype.disconnect = function() {
 };
 
 beseda.transport.WebSocket.prototype._doSend = function(data) {
-	console.log(data);
 	this.__ws['send'](data);
 };
 

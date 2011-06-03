@@ -7,6 +7,9 @@ var http    = require('http'),
     Router  = require('./vendor/beseda/server/lib/router.js');
 
 
+var redisClient = redis.createClient(6379/*, '192.168.1.161'*/);
+var pubsubClient = redis.createClient(6379/*, '192.168.1.161'*/);
+
 var router = new Router();
 
 router.get('/crossdomain.xml', function(request, response) {
@@ -22,96 +25,6 @@ router.get('/crossdomain.xml', function(request, response) {
 	);
 });
 
-var redisClient = redis.createClient(6379/*, '192.168.1.161'*/);
-
-redisClient.on('connected', function() {
-	util.print('Connected to Redis!\n');
-});
-
-redisClient.on('connection error', function(error) {
-	util.print('Redis connection error: ' + error + '\n');
-});
-
-router.get('/messages', function(request, response){
-
-	var data = '{"items":[';
-	var callback = function(message, isLast) {
-		data += message;
-
-		if (isLast) {
-			data += ']}';
-			response.end(data);
-
-			util.log(data);
-		} else {
-			data += ',';
-		}
-	}
-
-	redisClient.llen('messages', function(err, l){
-		var i = 0;
-		while (i < l) {
-			writeMessage(i, callback, i == l - 1);
-			i++;
-		}
-	});
-});
-
-function writeMessage(index, callback, isLast) {
-	redisClient.lindex('messages', index, function(err, message) {
-		callback(message, isLast);
-	});
-};
-
-router.post('/messages/new', function(request, response){
-	var data = '';
-
-    request.on('data', function(chunk){
-	    data += chunk;
-    });
-
-	request.on('end', function(){
-		var query = qs.parse(data);
-
-		redisClient.incr('last_message_id', function(err, id) {
-			if (err) throw err;
-
-			var message = {
-				id: id,
-				text: query.text,
-				createdAt: (Date.now() / 1000) | 0,
-				userName: query.userName,
-				pictureId: query.pictureId,
-				userId: query.userId
-			};
-
-			redisClient.rpush('messages', JSON.stringify(message), function(err) {
-				if (err) throw err;
-			});
-
-			message.sign = query.sign;
-
-			beseda.publish('/live', JSON.stringify({
-				action: 'message.new',
-				data: message
-			}));
-		});
-	});
-});
-
-router.get('/images', function(request, response) {
-   response.end(JSON.stringify({
-		items: [{
-			id: 1,
-			status: 1,
-			originalUrl: 'http://cs849.vkontakte.ru/u28117948/94411735/x_56ffb10b.jpg',
-			previewUrl: 'http://cs849.vkontakte.ru/u28117948/94411735/m_f2da357c.jpg',
-			thumbnailUrl: 'http://392.gt2.vkadre.ru/assets/thumbnails/2612f4b370999652.130.vk.jpg',
-			createdAt: (Date.now() / 1000) | 0
-		}]
-	}));
-});
-
 var server = http.createServer(function(request, response) {
     if (!router.dispatch(request, response)) {
         response.writeHead(404);
@@ -123,24 +36,192 @@ server.listen(4000);
 
 var beseda = new Beseda({ server : server, pubSub: 'redis' });
 
+///////////////////////////////////////////////////////////////////////////////
+//
+//      MESSAGE MANIPULATION
+//
+///////////////////////////////////////////////////////////////////////////////
 
-var IMG_FOLDER = '';
-var IMG_FOLDER_URL = '';
-var LAST_IMAGE_ID = 0;
+//-----------------------------------------------------------------------------
+//     Routes
+//-----------------------------------------------------------------------------
 
-var pubsubClient = redis.createClient(6379/*, '192.168.1.161'*/);
+router.get('/messages', allMessagesRequest);
+router.post('/messages/new', newMessageRequest);
+router.get('/messages/delete', deleteAllMessagesRequest);
 
-pubsubClient.on('connected', function() {
-	util.print('Connected to Redis pubsub!\n');
-});
+function allMessagesRequest(request, response) {
+	var data = '{"items":[';
 
-pubsubClient.on('connection error', function(error) {
-	util.print('Redis connection error: ' + error + '\n');
-});
+	var callback = function(message, isLast) {
+		if (isLast)
+			response.end(data + message + ']}');
+		else data += message + ',';
+	};
 
-pubsubClient.subscribeTo('Geometria_Streaming:kanon', function(channel, message) {
-	var url = message;
-	var prefix = 'image_' + LAST_IMAGE_ID++;
+	redisClient.llen('messages', function(err, l){
+		if (l != 0) requestMessages(l, callback)
+		else callback('', true);
+	});
+}
+
+function newMessageRequest(request, response) {
+	var data = '';
+
+    request.on('data', function(chunk){ data += chunk; });
+	request.on('end', function(){ applyMessage(data); });
+}
+
+function deleteAllMessagesRequest(request, response) {
+	response.end('OK!');
+
+	redisClient.del('messages');
+	redisClient.del('last_message_id');
+}
+
+//-----------------------------------------------------------------------------
+//      Sending all messages
+//-----------------------------------------------------------------------------
+
+function requestMessages(l, callback) {
+	var i = 0;
+	while (i < l) {
+		writeMessage(i, callback, i == l - 1);
+
+		i++;
+	}
+}
+
+function writeMessage(index, callback, isLast) {
+	redisClient.lindex('messages', index, function(err, message) {
+		callback(message, isLast);
+	});
+};
+
+//-----------------------------------------------------------------------------
+//      Message receiving
+//-----------------------------------------------------------------------------
+
+function applyMessage(data) {
+	redisClient.incr('last_message_id', function(err, id) {
+		if (id) {
+			var query = qs.parse(data);
+
+			var message = buildMessage(id, query);
+			saveMessage(message)
+
+			message.sign = query.sign;
+			publishMessage(message);
+		}
+	});
+}
+
+function buildMessage(id, query) {
+	return {
+		id: id,
+		text: query.text,
+		createdAt: (Date.now() / 1000) | 0,
+		userName: query.userName,
+		pictureId: query.pictureId,
+		userId: query.userId
+	};
+}
+
+function saveMessage(message) {
+	redisClient.rpush('messages', JSON.stringify(message));
+}
+
+function publishMessage(message) {
+	beseda.publish('/live', JSON.stringify({
+		action: 'message.new',
+		data: message
+	}));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//      IMAGE MANIPULATION
+//
+///////////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------------
+//      Constants
+//-----------------------------------------------------------------------------
+
+var IMG_FOLDER = '/Users/kononenko/Projects/Geometria.ru/public/files/';
+var IMG_FOLDER_URL = 'http://geometria.local/files/';
+
+//-----------------------------------------------------------------------------
+//      Routes
+//-----------------------------------------------------------------------------
+
+router.get('/images', allImageRequest);
+router.get('/images/delete', deleteAllImagesRequest);
+
+function allImageRequest(request, response) {
+	var data = '{"items":[';
+
+	var callback = function(message, isLast) {
+		if (isLast)
+			response.end(data + message + ']}');
+		else data += message + ',';
+	};
+
+	redisClient.llen('images', function(err, l){
+		if (l != 0) requestImages(l, callback)
+		else callback('', true);
+	});
+}
+
+function deleteAllImagesRequest(request, response) {
+	response.end('OK!');
+
+	redisClient.del('images');
+	redisClient.del('last_image_id');
+}
+
+//-----------------------------------------------------------------------------
+//      Image convertion
+//-----------------------------------------------------------------------------
+
+function convertOriginal(url, name, callback) {
+	im.convert([
+		'-resize', '1280x1024', url, '-sampling-factor', '2x1',  '-support', '0.9',
+		'-resize', '1280x1024', '-format', '"%w %h %[EXIF:DateTime]"',
+		'-identify', '-quality','90', name
+	], callback);
+}
+
+function convertPreview(url, name, callback) {
+	im.convert([
+		'-resize', '150x200', url, '-sampling-factor','2x1', '-support', '0.9',
+		'-resize', '150x200', '-format', '"%w %h %[EXIF:DateTime]"',
+		'-identify', '-quality', '90', name
+	], callback);
+}
+
+function convertThumb(url, name, callback) {
+	im.convert([
+		'-resize', '76x76', url, '-thumbnail','76x76^', '-unsharp','0x1+1+0',
+        '-quality','90', '-flatten', '-gravity','center', '-extent', '76x76',
+        name
+	], callback);
+}
+
+//-----------------------------------------------------------------------------
+//     Image receiving (from redis)
+//-----------------------------------------------------------------------------
+
+pubsubClient.subscribeTo('Geometria_Streaming:kanon', newMessageNotification);
+
+function newMessageNotification(channel, message) {
+	redisClient.incr('last_image_id', function(err, id) {
+		convertImage(id, message);
+	});
+}
+
+function convertImage(id, path) {
+	var prefix = 'image_' + id;
 	var original = prefix + '.jpg'
 	var preview = prefix + '_preview.jpg'
 	var thumbnail = prefix + '_thumb.jpg'
@@ -149,90 +230,63 @@ pubsubClient.subscribeTo('Geometria_Streaming:kanon', function(channel, message)
 	var callback = function() {
 		i++;
 
-		if (i === 3) {
-			sendImage(
-				IMG_FOLDER_URL + original,
-				IMG_FOLDER_URL + preview,
-				IMG_FOLDER_URL + thumbnail
-			);
-		}
+		if (i === 3) applyImage(
+			id,
+			IMG_FOLDER_URL + original,
+			IMG_FOLDER_URL + preview,
+			IMG_FOLDER_URL + thumbnail
+		);
 	}
 
-	convertOriginal(url, IMG_FOLDER + original, callback);
-	convertPreview(url, IMG_FOLDER + preview, callback);
-	convertThumb(url, IMG_FOLDER + thumbnail, callback);
-});
+	convertOriginal(path, IMG_FOLDER + original, callback);
+	convertPreview(path, IMG_FOLDER + preview, callback);
+	convertThumb(path, IMG_FOLDER + thumbnail, callback);
+}
 
+function applyImage(id, original, preview, thumbnail) {
+	var image = buildImage(id, original, preview, thumbnail);
 
-function sendImage(original, preview, thumbnail) {
+	saveImage(image);
+	publishImage(image);
+}
+
+function buildImage(id, original, preview, thumbnail) {
+	return {
+		id: id,
+		status: 1,
+		originalUrl: original,
+		previewUrl: preview,
+		thumbnailUrl: thumbnail,
+		createdAt: (Date.now() / 1000) | 0
+	}
+}
+
+function saveImage(image) {
+	redisClient.rpush('images', JSON.stringify(image));
+}
+
+function publishImage(image) {
 	beseda.publish('/live', JSON.stringify({
 		action: 'picture.approve',
-		data: {
-			id: ++LAST_IMAGE_ID,
-			status: 1,
-			originalUrl: original,
-			previewUrl: preview,
-			thumbnailUrl: thumbnail,
-			createdAt: (Date.now() / 1000) | 0
-		}
+		data: image
 	}));
 }
 
-function convertOriginal(url, name, callback) {
-	im.convert([
-		'-resize',
-		'1280x1024',
-		url,
-        '-sampling-factor',
-		'2x1',
-        '-support',
-		'0.9',
-		'-resize',
-		'1280x1024',
-		'-format',
-		'"%w %h %[EXIF:DateTime]"',
-		'-identify',
-		'-quality','90',
-		name
-	], function(err, stdout, stderr){
-			if (err) throw err;
-			callback();
-		}
-	);
+//-----------------------------------------------------------------------------
+//      Sending all images
+//-----------------------------------------------------------------------------
+
+function requestImages(l, callback) {
+	var i = 0;
+	
+	while (i < l) {
+		writeImage(i, callback, i == l - 1);
+		i++;
+	}
 }
 
-function convertPreview(url, name, callback) {
-	im.convert([
-		'-resize', '150x200',
-		url,
-        '-sampling-factor','2x1',
-        '-support', '0.9',
-		'-resize', '150x200',
-		'-format', '"%w %h %[EXIF:DateTime]"',
-		'-identify',
-		'-quality', '90',
-		name
-	], function(err, stdout, stderr){
-			if (err) throw err;
-			callback();
-		}
-	);
-}
-
-function convertThumb(url, name, callback) {
-	im.convert([
-		'-resize', '76x76',
-		url,
-        '-thumbnail','76x76^',
-        '-unsharp','0x1+1+0',
-        '-quality','90',
-        '-flatten',
-        '-gravity','center',
-        '-extent', '76x76',
-        name
-	], function(err, stdout, stderr){
-			if (err) throw err;
-			callback();
-		}
-	);
+function writeImage(index, callback, isLast){
+	redisClient.lindex('images', index, function(err, image) {
+		callback(image, isLast);
+	});
 }
