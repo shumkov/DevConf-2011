@@ -148,8 +148,8 @@ function publishMessage(message) {
 //      Constants
 //-----------------------------------------------------------------------------
 
-var IMG_FOLDER = '/Users/kononenko/Projects/Geometria.ru/public/files/';
-var IMG_FOLDER_URL = 'http://geometria.local/files/';
+var IMG_FOLDER = '/mnt/betta-pics/streaming/pics/';
+var IMG_FOLDER_URL = 'http://192.168.1.3/streaming/pics/';
 
 //-----------------------------------------------------------------------------
 //      Routes
