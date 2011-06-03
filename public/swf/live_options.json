@@ -4,10 +4,11 @@
 	"connection_controller": { "type": "control.ConnectionController" },
 	"slide_show_controller": { "type": "control.SlideShowController" },
 	"gallery_controller": { "type": "control.GalleryController" },
+	"spectrum_controller": { "type": "control.SpectrumController" },
+    	//"moderator_controller": { "type": "control.ModeratorController" },
 	"audio_controller": { "type": "control.AudioController" },
 	"growl_controller": { "type": "control.GrowlController" },
 	"view_controller": { "type": "control.ViewController" },
-    "spectrum_controller": { "type": "control.SpectrumController" },
 	"chat_controller": { 
 		"type": "control.ChatController",
 		"factory": {
@@ -79,8 +80,7 @@
 		"ui_growlContainer": {
 			"width": 300,
 			"top": 55,
-			"right": 5,
-			"depth": -4
+			"right": 5
 		},
 
 		"ui_chatPanel": {
@@ -88,7 +88,6 @@
 			"bottom": 130, 
 			"right": 0,
 			"width": 300,
-			"depth": -3,
 
 			"children": {
 				"ui_chatToggleButton": {
@@ -152,14 +151,6 @@
 			"center": 0, 
 			"middle": 0,
 			"depth": 1 
-		},
-
-		"ui_logoPlace": {
-			"depth": -1, 
-			"right": 10, 
-			"bottom": 10,
-			"width": 150,
-			"height": 70
 		},
 
 		"ui_topPanel": {
