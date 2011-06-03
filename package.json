@@ -1,5 +1,5 @@
 {
-    "name": "devconf-2011 live",
+    "name": "devconf-2011",
     "version": "0.0.1",
     "description": "",
     "homepage": "http://geometria-lab.net",
@@ -15,7 +15,7 @@
     },
     "dependencies" : {
         "redis-node"  : ">=0.4.0",
-        "beseda"      : "*",
+        "beseda"      : ">=0.0.8",
         "imagemagick" : "*"
     },
     "engines" : [ "node >=0.4" ]
