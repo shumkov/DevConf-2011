@@ -151,8 +151,8 @@ function publishMessage(message) {
 //      Constants
 //-----------------------------------------------------------------------------
 
-var IMG_FOLDER = '/Users/kononenko/Projects/Geometria.ru/public/files/';
-var IMG_FOLDER_URL = 'http://geometria.local/files/';
+var IMG_FOLDER = '/mnt/betta-pics/streaming/pics/';
+var IMG_FOLDER_URL = 'http://192.168.1.3/streaming/pics/';
 
 //-----------------------------------------------------------------------------
 //      Routes
@@ -189,24 +189,24 @@ function deleteAllImagesRequest(request, response) {
 
 function convertOriginal(url, name, callback) {
 	im.convert([
-		'-resize', '1280x1024', url, '-sampling-factor', '2x1',  '-support', '0.9',
-		'-resize', '1280x1024', '-format', '"%w %h %[EXIF:DateTime]"',
-		'-identify', '-quality','90', name
+		'-size', '1280x1024', url, '-sampling-factor', '2x1',  '-support', '0.9',
+		'-resize', '1280x1024>', '-format', '"%w %h %[EXIF:DateTime]"',
+		'-identify', '-quality','90', '-auto-orient', name
 	], callback);
 }
 
 function convertPreview(url, name, callback) {
 	im.convert([
-		'-resize', '150x200', url, '-sampling-factor','2x1', '-support', '0.9',
-		'-resize', '150x200', '-format', '"%w %h %[EXIF:DateTime]"',
-		'-identify', '-quality', '90', name
+		'-size', '150x200', url, '-sampling-factor','2x1', '-support', '0.9',
+		'-resize', '150x200>', '-format', '"%w %h %[EXIF:DateTime]"',
+		'-identify', '-quality', '90', '-auto-orient', name
 	], callback);
 }
 
 function convertThumb(url, name, callback) {
 	im.convert([
-		'-resize', '76x76', url, '-thumbnail','76x76^', '-unsharp','0x1+1+0',
-        '-quality','90', '-flatten', '-gravity','center', '-extent', '76x76',
+		'-size', '76x76', url, '-thumbnail','76x76^', '-unsharp','0x1+1+0',
+        '-quality','90', '-auto-orient',  '-flatten', '-gravity','center', '-extent', '76x76',
         name
 	], callback);
 }
