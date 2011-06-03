@@ -69,7 +69,10 @@ function newMessageRequest(request, response) {
 	var data = '';
 
     request.on('data', function(chunk){ data += chunk; });
-	request.on('end', function(){ applyMessage(data); });
+	request.on('end', function(){
+		applyMessage(data);
+		response.end();
+	});
 }
 
 function deleteAllMessagesRequest(request, response) {
